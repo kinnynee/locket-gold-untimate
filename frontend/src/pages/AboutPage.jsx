@@ -4,13 +4,6 @@ import { Sparkles } from 'lucide-react';
 import { FILTERS } from '../data/mockData';
 import Badge from '../components/ui/Badge';
 
-const techStack = [
-  { category: 'Frontend', icon: '⚛️', items: ['React 18', 'Vite 6', 'TailwindCSS', 'Framer Motion', 'Zustand'] },
-  { category: 'Backend',  icon: '🐍', items: ['Python Flask', 'OpenCV', 'Pillow', 'NumPy'] },
-  { category: 'AI & ML',  icon: '🤖', items: ['AI Filter Suggest', 'OpenCV DNN', 'Image Analysis'] },
-  { category: 'UX/UI',    icon: '🎨', items: ['Mobile First', 'Dark Mode', 'Glassmorphism', 'Gold Design'] },
-];
-
 const featuresList = [
   { label: 'Upload ảnh & video', icon: '📤' },
   { label: 'Warm Gold Filter', icon: '✨' },
@@ -57,14 +50,14 @@ export default function AboutPage() {
           </div>
 
           <p className="about-desc">
-            Ứng dụng xử lý ảnh và video chuyên nghiệp, được phát triển như đồ án đại học với
-            công nghệ Flask + OpenCV + React.
+            Ứng dụng chụp, chỉnh sửa ảnh và video với các bộ lọc màu cực chất. 
+            Mang đến cho bạn những bức ảnh mang phong cách hoài cổ, ấm áp và lung linh nhất!
           </p>
 
           <div className="about-badges">
-            <Badge variant="gold">✨ Đồ án đại học</Badge>
-            <Badge variant="green">✅ Giao diện tiếng Việt</Badge>
-            <Badge variant="blue">📱 Mobile First</Badge>
+            <Badge variant="gold">✨ Bộ lọc độc quyền</Badge>
+            <Badge variant="green">✅ Dễ dàng sử dụng</Badge>
+            <Badge variant="blue">📱 Lưu giữ kỉ niệm</Badge>
           </div>
         </motion.div>
 
@@ -91,33 +84,19 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        {/* Tech Stack */}
+        {/* About App */}
         <motion.div
           variants={sectionIn} initial="hidden" whileInView="show" viewport={{ once: true }}
           className="about-section"
         >
-          <h2 className="about-section-title font-display">Công nghệ sử dụng</h2>
-          <div className="tech-grid">
-            {techStack.map((stack, i) => (
-              <motion.div
-                key={stack.category}
-                initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * .1 }}
-                className="tech-card"
-              >
-                <div className="tech-card-header">
-                  <span className="tech-card-icon">{stack.icon}</span>
-                  <h3 className="tech-card-title">{stack.category}</h3>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {stack.items.map(item => (
-                    <span key={item} className="tech-tag">{item}</span>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
+          <h2 className="about-section-title font-display">Locket Gold là gì?</h2>
+          <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', color: 'var(--text-2)', lineHeight: 1.6 }}>
+            <p style={{ marginBottom: 16 }}>
+              Locket Gold Ultimate là ứng dụng giúp bạn lưu giữ mọi khoảnh khắc đáng nhớ một cách nghệ thuật nhất. Không cần phải rành về chỉnh sửa, ứng dụng đã cung cấp sẵn những bộ lọc màu (filter) được thiết kế tỉ mỉ, giúp hô biến bức ảnh bình thường thành những tác phẩm mang đậm phong cách vintage, màu phim, hay rực rỡ ấm áp.
+            </p>
+            <p>
+              Bạn có thể tự sướng, ghép ảnh kiểu Photobooth Hàn Quốc, hay áp dụng bộ lọc cho cả video. Mọi thứ đều tự động, nhanh chóng và cực kỳ dễ sử dụng!
+            </p>
           </div>
         </motion.div>
 
@@ -147,7 +126,6 @@ export default function AboutPage() {
                   </div>
                   <p className="filter-detail-desc">{f.description}</p>
                 </div>
-                <code className="filter-detail-api">{f.apiKey}</code>
               </motion.div>
             ))}
           </div>
@@ -157,8 +135,8 @@ export default function AboutPage() {
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
           <div className="about-footer">
             <p className="about-footer-title font-display gold-gradient-text">LOCKET GOLD ULTIMATE</p>
-            <p className="about-footer-sub">Đồ án đại học — Xử lý ảnh và video với AI</p>
-            <p className="about-footer-made">Built with ❤️ using React + Flask + OpenCV</p>
+            <p className="about-footer-sub">Lưu giữ mọi khoảnh khắc lung linh nhất</p>
+            <p className="about-footer-made">Phiên bản Premium dành riêng cho bạn ❤️</p>
           </div>
         </motion.div>
 
