@@ -1,5 +1,4 @@
 // src/components/editor/FilterPanel.jsx
-import { motion } from 'framer-motion';
 import FilterCard from './FilterCard';
 import { FILTERS } from '../../data/mockData';
 import useEditorStore from '../../store/editorStore';
@@ -10,52 +9,39 @@ export default function FilterPanel() {
   const categories = [
     { key: 'premium', label: '✨ Premium' },
     { key: 'classic', label: '📷 Cổ điển' },
-    { key: 'beauty', label: '💆 Làm đẹp' },
+    { key: 'beauty',  label: '💆 Làm đẹp' },
   ];
 
-  const handleSelect = (filter) => {
-    if (activeFilter?.id === filter.id) {
-      setActiveFilter(null);
-    } else {
-      setActiveFilter(filter);
-    }
+  const handleSelect = filter => {
+    setActiveFilter(activeFilter?.id === filter.id ? null : filter);
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
-        <span>🎨</span>
-        Bộ Lọc
-      </h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <p className="panel-section-label">🎨 Bộ Lọc</p>
 
-      {/* No Filter Option */}
-      <motion.div
+      {/* No Filter */}
+      <div
         onClick={() => setActiveFilter(null)}
-        whileHover={{ y: -2 }}
-        whileTap={{ scale: 0.97 }}
-        className={[
-          'filter-card cursor-pointer',
-          !activeFilter ? 'active' : '',
-        ].join(' ')}
+        className={`filter-item${!activeFilter ? ' active' : ''}`}
+        style={{ cursor: 'pointer' }}
       >
-        <div className="aspect-square rounded-xl bg-zinc-800 border-2 border-dashed border-zinc-600 flex items-center justify-center text-zinc-500">
-          <span className="text-xs font-medium">Gốc</span>
+        <div className="filter-item-body" style={{ background: 'var(--bg-panel)' }}>
+          <span style={{ fontSize: 20 }}>🚫</span>
+          <span className="filter-item-name">Gốc</span>
         </div>
-        <div className="pt-1.5 px-0.5">
-          <p className={`text-xs font-medium ${!activeFilter ? 'text-yellow-400' : 'text-zinc-400'}`}>
-            Không lọc
-          </p>
-        </div>
-      </motion.div>
+        {!activeFilter && <div className="filter-item-active-dot" />}
+      </div>
 
       {/* Filters by category */}
-      {categories.map((cat) => {
-        const catFilters = FILTERS.filter((f) => f.category === cat.key);
+      {categories.map(cat => {
+        const catFilters = FILTERS.filter(f => f.category === cat.key);
+        if (!catFilters.length) return null;
         return (
-          <div key={cat.key} className="space-y-2">
-            <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">{cat.label}</p>
-            <div className="grid grid-cols-3 gap-2">
-              {catFilters.map((filter) => (
+          <div key={cat.key}>
+            <p className="panel-section-label">{cat.label}</p>
+            <div className="filter-grid">
+              {catFilters.map(filter => (
                 <FilterCard
                   key={filter.id}
                   filter={filter}

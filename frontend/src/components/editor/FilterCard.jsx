@@ -7,49 +7,34 @@ export default function FilterCard({ filter, isActive, onClick, previewUrl }) {
     <motion.div
       onClick={onClick}
       whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.97 }}
-      className={[
-        'filter-card cursor-pointer group relative',
-        isActive ? 'active' : '',
-      ].join(' ')}
+      whileTap={{ scale: .97 }}
+      className={`filter-item${isActive ? ' active' : ''}`}
+      style={{ cursor: 'pointer' }}
     >
-      {/* Preview Image */}
-      <div className="aspect-square overflow-hidden rounded-xl bg-zinc-800">
+      <div className="filter-item-body" style={{ background: filter.preview }}>
         {previewUrl ? (
           <img
             src={previewUrl}
             alt={filter.nameVi}
-            className="w-full h-full object-cover"
-            style={{ filter: filter.cssFilter }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: filter.cssFilter, borderRadius: 10 }}
           />
         ) : (
-          <div
-            className="w-full h-full flex items-center justify-center text-2xl"
-            style={{ background: filter.preview }}
-          >
-            {filter.icon}
-          </div>
+          <>
+            <span className="filter-item-emoji">{filter.icon}</span>
+            <span className="filter-item-name">{filter.nameVi}</span>
+          </>
         )}
       </div>
 
-      {/* Active Overlay */}
-      {isActive && (
-        <div className="absolute inset-0 rounded-xl bg-yellow-500/10 flex items-start justify-end p-1.5">
-          <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center shadow-lg">
-            <Check size={12} className="text-black font-bold" strokeWidth={3} />
-          </div>
+      {isActive && <div className="filter-item-active-dot" />}
+
+      {!previewUrl && (
+        <div style={{ padding: '4px 2px' }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: isActive ? 'var(--gold-400)' : 'var(--text-2)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {filter.nameVi}
+          </p>
         </div>
       )}
-
-      {/* Label */}
-      <div className="pt-1.5 px-0.5">
-        <p className={`text-xs font-medium truncate ${isActive ? 'text-yellow-400' : 'text-zinc-300'}`}>
-          {filter.nameVi}
-        </p>
-        {filter.category === 'premium' && (
-          <span className="text-[10px] text-yellow-500/70">✨ Premium</span>
-        )}
-      </div>
     </motion.div>
   );
 }

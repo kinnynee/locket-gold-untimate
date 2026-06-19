@@ -21,8 +21,8 @@ import Spinner from '../components/ui/Spinner';
 const PANEL_TABS = [
   { id: 'filter', label: 'Bộ Lọc', icon: '🎨' },
   { id: 'adjust', label: 'Điều Chỉnh', icon: '🎛️' },
-  { id: 'frame', label: 'Khung', icon: '🖼️' },
-  { id: 'ai', label: 'AI Gợi Ý', icon: '✨' },
+  { id: 'frame',  label: 'Khung',    icon: '🖼️' },
+  { id: 'ai',     label: 'AI',       icon: '✨' },
 ];
 
 export default function EditorPage() {
@@ -39,7 +39,6 @@ export default function EditorPage() {
     setUploadProgress,
   } = useEditorStore();
 
-  // Handle upload to backend
   useEffect(() => {
     if (!uploadedFile) return;
     const handleUpload = async () => {
@@ -52,8 +51,7 @@ export default function EditorPage() {
           result = await uploadVideo(uploadedFile, setUploadProgress);
         }
         setImageId(result.id || result.image_id || 'demo-id');
-      } catch (err) {
-        // Demo mode: continue without backend
+      } catch {
         setImageId('demo-id');
       } finally {
         setIsUploading(false);
@@ -63,16 +61,13 @@ export default function EditorPage() {
   }, [uploadedFile]);
 
   const handleApply = async () => {
-    if (!imageId) {
-      toast.error('Vui lòng tải ảnh lên trước');
-      return;
-    }
+    if (!imageId) { toast.error('Vui lòng tải ảnh lên trước'); return; }
     setIsApplying(true);
     try {
       await applyFilter(imageId, activeFilter?.apiKey, adjustments);
       toast.success('Đã áp dụng bộ lọc!');
     } catch {
-      toast('Chạy ở chế độ demo — kết quả hiển thị trực tiếp trên trình duyệt', { icon: '💡' });
+      toast('Chạy ở chế độ demo — kết quả hiển thị trực tiếp', { icon: '💡' });
     } finally {
       setIsApplying(false);
     }
@@ -85,7 +80,6 @@ export default function EditorPage() {
         const blob = await downloadImage(imageId);
         downloadBlob(blob, `locket-gold-${Date.now()}.jpg`);
       } else {
-        // Demo: download current preview directly
         const a = document.createElement('a');
         a.href = previewUrl;
         a.download = `locket-gold-${Date.now()}.jpg`;
@@ -97,76 +91,72 @@ export default function EditorPage() {
     }
   };
 
-  const handleReset = () => {
-    reset();
-    toast('Đã xóa và đặt lại', { icon: '🔄' });
-  };
+  const handleReset = () => { reset(); toast('Đã đặt lại', { icon: '🔄' }); };
+
+  const showApplyBtn = activeFilter || Object.values(adjustments).some(v => v !== 0);
 
   return (
-    <div className="flex flex-col h-screen pt-16">
-      {/* ── Top Bar ── */}
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800/50">
+    <div className="editor-layout">
+      {/* ── Toolbar ── */}
+      <div className="toolbar">
         {/* Mode Toggle */}
-        <div className="flex items-center gap-1 p-1 bg-zinc-800 rounded-xl">
+        <div className="mode-toggle">
           <button
+            className={`mode-btn${mode === 'image' ? ' active' : ''}`}
             onClick={() => setMode('image')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${mode === 'image' ? 'bg-yellow-500 text-black' : 'text-zinc-400 hover:text-zinc-200'}`}
           >
-            <Image size={13} />
-            Ảnh
+            <Image size={13} /> Ảnh
           </button>
           <button
+            className={`mode-btn${mode === 'video' ? ' active' : ''}`}
             onClick={() => setMode('video')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${mode === 'video' ? 'bg-yellow-500 text-black' : 'text-zinc-400 hover:text-zinc-200'}`}
           >
-            <Film size={13} />
-            Video
+            <Film size={13} /> Video
           </button>
         </div>
 
-        <div className="flex-1" />
+        <div className="toolbar-sep" />
 
-        {/* History Controls */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={undo}
-            disabled={historyIndex < 0}
-            className="p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            title="Hoàn tác"
-          >
-            <Undo2 size={15} />
-          </button>
-          <button
-            onClick={redo}
-            disabled={historyIndex >= history.length - 1}
-            className="p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            title="Làm lại"
-          >
-            <Redo2 size={15} />
-          </button>
-        </div>
+        {/* History */}
+        <button
+          className="toolbar-icon-btn"
+          onClick={undo}
+          disabled={historyIndex < 0}
+          title="Hoàn tác"
+        >
+          <Undo2 size={15} />
+        </button>
+        <button
+          className="toolbar-icon-btn"
+          onClick={redo}
+          disabled={historyIndex >= history.length - 1}
+          title="Làm lại"
+        >
+          <Redo2 size={15} />
+        </button>
 
-        {/* Apply & Download */}
+        <div className="toolbar-spacer" />
+
+        {/* Actions */}
         {previewUrl && (
-          <div className="flex items-center gap-2">
+          <>
             <Button variant="ghost" size="sm" onClick={handleReset}>
-              <RotateCcw size={14} />
-              <span className="hidden sm:inline">Đặt lại</span>
+              <RotateCcw size={13} />
+              <span style={{ display: 'none' }} className="sm-show">Đặt lại</span>
             </Button>
             <Button variant="gold" size="sm" onClick={handleDownload}>
-              <Download size={14} />
-              <span className="hidden sm:inline">Tải xuống</span>
+              <Download size={13} /> Tải xuống
             </Button>
-          </div>
+          </>
         )}
       </div>
 
-      {/* ── Main Editor Layout ── */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Canvas Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+      {/* ── Main ── */}
+      <div className="editor-main">
+        {/* Canvas */}
+        <div className="editor-canvas-area">
           {isUploading ? (
-            <div className="flex-1 flex items-center justify-center">
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Spinner size="lg" label="Đang tải lên..." />
             </div>
           ) : !previewUrl ? (
@@ -176,64 +166,55 @@ export default function EditorPage() {
           )}
         </div>
 
-        {/* ── Right Panel (Desktop) ── */}
+        {/* ── Desktop Right Panel ── */}
         {previewUrl && (
           <>
-            {/* Toggle Button */}
             <button
+              className="editor-panel-toggle"
               onClick={() => setPanelOpen(!panelOpen)}
-              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-5 h-12 items-center justify-center bg-zinc-800 border border-zinc-700 rounded-l-lg text-zinc-400 hover:text-zinc-100 transition-colors"
-              style={{ right: panelOpen ? '320px' : '0' }}
+              style={{ right: panelOpen ? 320 : 0 }}
+              title={panelOpen ? 'Ẩn panel' : 'Hiện panel'}
             >
-              {panelOpen ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+              {panelOpen ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
             </button>
 
             <AnimatePresence>
               {panelOpen && (
                 <motion.aside
+                  key="editor-panel"
                   initial={{ width: 0, opacity: 0 }}
                   animate={{ width: 320, opacity: 1 }}
                   exit={{ width: 0, opacity: 0 }}
-                  transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-                  className="hidden md:flex flex-col h-full bg-zinc-900 border-l border-zinc-800/50 overflow-hidden"
+                  transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+                  className="side-panel"
                   style={{ width: 320, minWidth: 320 }}
                 >
-                  {/* Tab Pills */}
-                  <div className="p-3 border-b border-zinc-800/50 grid grid-cols-4 gap-1">
-                    {PANEL_TABS.map((tab) => (
+                  {/* Tabs */}
+                  <div className="panel-tabs">
+                    {PANEL_TABS.map(tab => (
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={[
-                          'flex flex-col items-center gap-0.5 py-2 rounded-xl text-[11px] font-medium transition-all',
-                          activeTab === tab.id
-                            ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
-                            : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800',
-                        ].join(' ')}
+                        className={`panel-tab-btn${activeTab === tab.id ? ' active' : ''}`}
                       >
-                        <span className="text-base">{tab.icon}</span>
+                        <span style={{ fontSize: 16 }}>{tab.icon}</span>
                         {tab.label}
                       </button>
                     ))}
                   </div>
 
-                  {/* Panel Content */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                  {/* Content */}
+                  <div className="panel-body">
                     {activeTab === 'filter' && <FilterPanel />}
                     {activeTab === 'adjust' && <AdjustmentPanel />}
                     {activeTab === 'frame' && <FrameBuilder />}
                     {activeTab === 'ai' && <AIFilterSuggest />}
                   </div>
 
-                  {/* Apply Button */}
-                  {(activeFilter || Object.values(adjustments).some((v, i) => v !== 0)) && (
-                    <div className="p-3 border-t border-zinc-800/50">
-                      <Button
-                        variant="gold"
-                        className="w-full"
-                        onClick={handleApply}
-                        isLoading={isApplying}
-                      >
+                  {/* Apply */}
+                  {showApplyBtn && (
+                    <div className="panel-footer">
+                      <Button variant="gold" style={{ width: '100%' }} onClick={handleApply} isLoading={isApplying}>
                         Áp dụng & Xử lý
                       </Button>
                     </div>
@@ -247,28 +228,20 @@ export default function EditorPage() {
 
       {/* ── Mobile Bottom Panel ── */}
       {previewUrl && (
-        <div className="md:hidden border-t border-zinc-800/50 bg-zinc-900 pb-16">
-          {/* Mobile Tabs */}
-          <div className="flex overflow-x-auto gap-1 p-2 scrollbar-none">
-            {PANEL_TABS.map((tab) => (
+        <div className="editor-mobile-panel md:hidden">
+          <div className="editor-mobile-tabs">
+            {PANEL_TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={[
-                  'flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap',
-                  activeTab === tab.id
-                    ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
-                    : 'text-zinc-500 bg-zinc-800 hover:text-zinc-300',
-                ].join(' ')}
+                className={`editor-mobile-tab${activeTab === tab.id ? ' active' : ''}`}
               >
-                {tab.icon}
+                <span>{tab.icon}</span>
                 {tab.label}
               </button>
             ))}
           </div>
-
-          {/* Mobile Panel Content */}
-          <div className="max-h-60 overflow-y-auto px-3 pb-3">
+          <div className="editor-mobile-content">
             {activeTab === 'filter' && <FilterPanel />}
             {activeTab === 'adjust' && <AdjustmentPanel />}
             {activeTab === 'frame' && <FrameBuilder />}

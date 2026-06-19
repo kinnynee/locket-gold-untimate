@@ -1,257 +1,246 @@
 // src/pages/HomePage.jsx
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Upload, Wand2, Images, Camera, ArrowRight, Sparkles, Zap, Shield } from 'lucide-react';
+import { Upload, Wand2, Images, Camera, ArrowRight, Sparkles, Zap, Shield, Image, Film } from 'lucide-react';
 import { MOCK_GALLERY, FILTERS } from '../data/mockData';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 
 const features = [
-  { icon: Wand2, label: 'Bộ lọc AI', desc: 'Gợi ý thông minh từ AI', color: 'text-yellow-400' },
-  { icon: Zap, label: 'Xử lý nhanh', desc: 'Kết quả tức thì với Flask', color: 'text-amber-400' },
-  { icon: Shield, label: 'Bảo mật', desc: 'Dữ liệu lưu trên máy bạn', color: 'text-emerald-400' },
+  { icon: Wand2,  label: 'Bộ lọc AI',       desc: 'Gợi ý thông minh dựa trên nội dung ảnh của bạn',     color: '#fbbf24', bg: 'rgba(251,191,36,.12)' },
+  { icon: Zap,    label: 'Xử lý tức thì',   desc: 'Kết quả ngay lập tức với Flask + OpenCV backend',     color: '#fb923c', bg: 'rgba(251,146,60,.12)' },
+  { icon: Shield, label: 'Bảo mật tuyệt đối', desc: 'Dữ liệu xử lý cục bộ, không upload lên bất kỳ server nào', color: '#34d399', bg: 'rgba(52,211,153,.12)' },
 ];
 
-const containerVariants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
-};
+const quickActions = [
+  { label: 'Chỉnh ảnh',   icon: Image,  path: '/editor',         desc: 'Upload & chỉnh sửa chuyên nghiệp', color: '#fbbf24' },
+  { label: 'Chỉnh video', icon: Film,   path: '/editor?tab=video', desc: 'Áp dụng bộ lọc cho video',        color: '#fb923c' },
+  { label: 'Thư viện',    icon: Images, path: '/gallery',         desc: 'Xem toàn bộ lịch sử chỉnh sửa',   color: '#a78bfa' },
+  { label: 'Photobooth',  icon: Camera, path: '/photobooth',      desc: 'Tạo ảnh nhóm phong cách Locket',   color: '#34d399' },
+];
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', damping: 20 } },
+const stats = [
+  { value: '6+',   label: 'Bộ lọc vàng' },
+  { value: '18+',  label: 'Thông số chỉnh' },
+  { value: '100%', label: 'Bảo mật offline' },
+];
+
+const fade = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } };
+const stagger = { hidden: {}, show: { transition: { staggerChildren: .09 } } };
+const sectionFade = {
+  hidden: { opacity: 0, y: 32 },
+  show: { opacity: 1, y: 0, transition: { duration: .55, ease: 'easeOut' } },
 };
 
 export default function HomePage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen">
-      {/* ── Hero Section ── */}
-      <section className="relative min-h-[92vh] flex items-center justify-center px-4 pt-16 overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-yellow-500/8 blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-amber-600/6 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-yellow-500/5" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full border border-yellow-500/3" />
+    <div>
+      {/* ══ HERO ══ */}
+      <section className="hero-section">
+        <div className="hero-bg">
+          <div className="orb orb-1" />
+          <div className="orb orb-2" />
+          <div className="orb orb-3" />
+          <div className="grid-lines" />
         </div>
 
         <motion.div
-          variants={containerVariants}
+          variants={stagger}
           initial="hidden"
           animate="show"
-          className="relative z-10 text-center max-w-3xl mx-auto space-y-8"
+          className="hero-content"
         >
-          {/* Badge */}
-          <motion.div variants={itemVariants} className="flex justify-center">
-            <Badge variant="premium" className="px-4 py-1.5 text-sm">
-              <Sparkles size={13} />
-              Phiên bản Ultimate
+          <motion.div variants={fade} style={{ display: 'flex', justifyContent: 'center' }}>
+            <Badge variant="premium" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 16px', fontSize: 12 }}>
+              <Sparkles size={12} /> Phiên bản Ultimate
             </Badge>
           </motion.div>
 
-          {/* Title */}
-          <motion.div variants={itemVariants} className="space-y-3">
-            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl font-bold leading-tight">
-              <span className="gold-gradient-text">LOCKET GOLD</span>
-              <br />
-              <span className="text-zinc-200 text-4xl sm:text-5xl md:text-6xl">ULTIMATE</span>
-            </h1>
-            <p className="text-zinc-400 text-lg sm:text-xl max-w-xl mx-auto leading-relaxed">
-              Ứng dụng chỉnh sửa ảnh và video chuyên nghiệp. Bộ lọc vàng độc quyền, xử lý bằng AI và OpenCV.
+          <motion.div variants={fade} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <h1 className="hero-title gold-gradient-text">LOCKET</h1>
+            <p className="hero-subtitle">GOLD ULTIMATE</p>
+            <p className="hero-desc">
+              Ứng dụng chỉnh sửa ảnh và video chuyên nghiệp.<br />
+              Bộ lọc vàng độc quyền, xử lý bằng AI và OpenCV.
             </p>
           </motion.div>
 
-          {/* CTA Buttons */}
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button
-              variant="gold"
-              size="lg"
-              onClick={() => navigate('/editor')}
-              className="w-full sm:w-auto gold-glow"
-            >
-              <Upload size={18} />
-              Bắt đầu chỉnh sửa
-              <ArrowRight size={16} />
+          <motion.div variants={fade} className="hero-ctas">
+            <Button variant="gold" size="lg" onClick={() => navigate('/editor')} className="gold-glow">
+              <Upload size={17} /> Bắt đầu chỉnh sửa <ArrowRight size={15} />
             </Button>
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={() => navigate('/photobooth')}
-              className="w-full sm:w-auto"
-            >
-              <Camera size={18} />
-              Photobooth
+            <Button variant="ghost" size="lg" onClick={() => navigate('/photobooth')}>
+              <Camera size={17} /> Photobooth
             </Button>
           </motion.div>
 
-          {/* Stats */}
-          <motion.div variants={itemVariants} className="flex items-center justify-center gap-8 pt-4">
-            {[
-              { value: '6+', label: 'Bộ lọc độc quyền' },
-              { value: '18+', label: 'Điều chỉnh chuyên sâu' },
-              { value: '100%', label: 'Bảo mật offline' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="font-display text-2xl font-bold gold-gradient-text">{stat.value}</p>
-                <p className="text-xs text-zinc-500 mt-0.5">{stat.label}</p>
+          <motion.div variants={fade} className="hero-stats">
+            {stats.map(s => (
+              <div key={s.label} style={{ textAlign: 'center' }}>
+                <p className="hero-stat-value gold-gradient-text">{s.value}</p>
+                <p className="hero-stat-label">{s.label}</p>
               </div>
             ))}
           </motion.div>
         </motion.div>
 
-        {/* Scroll Indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+          transition={{ delay: 1.8 }}
+          className="scroll-indicator"
         >
-          <div className="w-px h-8 bg-gradient-to-b from-transparent to-yellow-500/50" />
-          <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/50 animate-bounce" />
+          <div className="scroll-line" />
+          <div className="scroll-dot" />
         </motion.div>
       </section>
 
-      {/* ── Features Section ── */}
-      <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
+      {/* ══ FEATURES ══ */}
+      <section className="section">
+        <div className="container">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={sectionFade}
+            initial="hidden"
+            whileInView="show"
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="section-header"
           >
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-zinc-100 mb-3">
-              Tính năng nổi bật
-            </h2>
-            <p className="text-zinc-400 max-w-xl mx-auto">
-              Được xây dựng với Flask + OpenCV + AI cho trải nghiệm chỉnh sửa chuyên nghiệp
-            </p>
+            <span className="section-eyebrow">Tính năng</span>
+            <h2 className="section-title">Được xây dựng để xuất sắc</h2>
+            <p className="section-desc">Công nghệ Flask + OpenCV + AI cho trải nghiệm chỉnh sửa chuyên nghiệp</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-            {features.map((feat, i) => (
+          <div className="features-grid">
+            {features.map((f, i) => (
               <motion.div
-                key={feat.label}
-                initial={{ opacity: 0, y: 30 }}
+                key={f.label}
+                initial={{ opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="glass-card p-6 space-y-3 hover:border-yellow-500/20 transition-colors group"
+                transition={{ delay: i * .12, duration: .5, ease: 'easeOut' }}
+                className="feature-card"
               >
-                <div className={`w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center ${feat.color} group-hover:scale-110 transition-transform`}>
-                  <feat.icon size={20} />
+                <div className="feature-icon-wrap" style={{ background: f.bg, color: f.color }}>
+                  <f.icon size={22} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-zinc-100">{feat.label}</h3>
-                  <p className="text-sm text-zinc-400 mt-1">{feat.desc}</p>
+                  <h3 className="feature-card-title">{f.label}</h3>
+                  <p className="feature-card-desc">{f.desc}</p>
                 </div>
+                <div className="feature-accent" style={{ background: f.color }} />
               </motion.div>
             ))}
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { label: 'Chỉnh ảnh', icon: '🖼️', path: '/editor', desc: 'Upload & chỉnh sửa' },
-              { label: 'Chỉnh video', icon: '🎬', path: '/editor?tab=video', desc: 'Lọc video' },
-              { label: 'Thư viện', icon: '📚', path: '/gallery', desc: 'Xem lịch sử' },
-              { label: 'Photobooth', icon: '📸', path: '/photobooth', desc: 'Tạo ảnh nhóm' },
-            ].map((action) => (
+          <div className="quick-actions-grid">
+            {quickActions.map((a, i) => (
               <motion.button
-                key={action.label}
-                onClick={() => navigate(action.path)}
-                whileHover={{ y: -3, scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                className="p-4 rounded-2xl bg-zinc-800/60 border border-zinc-700/50 hover:border-yellow-500/30 hover:bg-zinc-800 text-left transition-all group"
+                key={a.label}
+                onClick={() => navigate(a.path)}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * .07, duration: .4 }}
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: .98 }}
+                className="qa-card"
               >
-                <span className="text-3xl mb-3 block group-hover:scale-110 transition-transform">{action.icon}</span>
-                <p className="font-semibold text-zinc-100 text-sm">{action.label}</p>
-                <p className="text-xs text-zinc-500 mt-0.5">{action.desc}</p>
+                <div className="qa-icon" style={{ color: a.color, background: `${a.color}18` }}>
+                  <a.icon size={20} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p className="qa-label">{a.label}</p>
+                  <p className="qa-desc">{a.desc}</p>
+                </div>
+                <ArrowRight size={14} className="qa-arrow" style={{ color: a.color }} />
               </motion.button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Filter Showcase ── */}
-      <section className="py-20 px-4 bg-gradient-to-b from-transparent via-zinc-900/30 to-transparent">
-        <div className="max-w-6xl mx-auto">
+      {/* ══ FILTER SHOWCASE ══ */}
+      <section className="section section-alt">
+        <div className="container">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={sectionFade}
+            initial="hidden"
+            whileInView="show"
             viewport={{ once: true }}
-            className="text-center mb-10"
+            className="section-header"
           >
-            <h2 className="font-display text-3xl font-bold text-zinc-100 mb-2">Bộ lọc độc quyền</h2>
-            <p className="text-zinc-400">6 bộ lọc được tối ưu cho ảnh phong cách Locket Gold</p>
+            <span className="section-eyebrow">Độc quyền</span>
+            <h2 className="section-title">Bộ lọc vàng đặc biệt</h2>
+            <p className="section-desc">6 bộ lọc được tối ưu riêng cho phong cách Locket Gold</p>
           </motion.div>
 
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-            {FILTERS.map((filter, i) => (
+          <div className="filters-showcase-grid">
+            {FILTERS.map((f, i) => (
               <motion.div
-                key={filter.id}
-                initial={{ opacity: 0, scale: 0.8 }}
+                key={f.id}
+                initial={{ opacity: 0, scale: .85 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.06 }}
-                className="group text-center space-y-2"
+                transition={{ delay: i * .07, duration: .4 }}
+                className="filter-showcase-item"
+                onClick={() => navigate('/editor')}
               >
-                <div
-                  className="aspect-square rounded-2xl flex items-center justify-center text-3xl border border-zinc-700/50 group-hover:border-yellow-500/40 transition-all group-hover:scale-105"
-                  style={{ background: filter.preview }}
-                >
-                  {filter.icon}
+                <div className="filter-showcase-preview" style={{ background: f.preview }}>
+                  <span className="filter-showcase-emoji">{f.icon}</span>
                 </div>
-                <p className="text-xs font-medium text-zinc-300">{filter.nameVi}</p>
+                <p className="filter-showcase-name">{f.nameVi}</p>
               </motion.div>
             ))}
           </div>
 
-          <div className="text-center mt-10">
-            <Button variant="gold" size="lg" onClick={() => navigate('/editor')}>
-              <Wand2 size={18} />
-              Thử ngay bộ lọc
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="section-cta"
+          >
+            <Button variant="gold" size="lg" onClick={() => navigate('/editor')} className="gold-glow">
+              <Wand2 size={17} /> Thử ngay bộ lọc <ArrowRight size={15} />
             </Button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ── Gallery Preview ── */}
-      <section className="py-20 px-4 pb-28 md:pb-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+      {/* ══ GALLERY PREVIEW ══ */}
+      <section className="section section-last">
+        <div className="container">
+          <motion.div
+            variants={sectionFade}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+            className="gallery-preview-header"
+          >
             <div>
-              <h2 className="font-display text-3xl font-bold text-zinc-100">Thư viện mẫu</h2>
-              <p className="text-zinc-400 text-sm mt-1">Xem trước kết quả xử lý</p>
+              <h2 className="section-title" style={{ textAlign: 'left' }}>Thư viện mẫu</h2>
+              <p className="section-desc" style={{ textAlign: 'left', marginTop: 6 }}>Xem trước kết quả xử lý</p>
             </div>
             <Button variant="ghost" size="sm" onClick={() => navigate('/gallery')}>
-              Xem tất cả
-              <ArrowRight size={14} />
+              Xem tất cả <ArrowRight size={13} />
             </Button>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="gallery-preview-grid">
             {MOCK_GALLERY.map((item, i) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="group relative rounded-xl overflow-hidden aspect-square cursor-pointer"
+                transition={{ delay: i * .05, duration: .4 }}
+                className="gallery-preview-item"
                 onClick={() => navigate('/gallery')}
               >
-                <img
-                  src={item.src}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="absolute bottom-2 left-2">
-                    <span className="text-xs text-white font-medium">{item.filter}</span>
-                  </div>
+                <img src={item.src} alt={item.title} />
+                <div className="gallery-preview-overlay">
+                  <span className="gallery-preview-tag">{item.filter}</span>
                 </div>
               </motion.div>
             ))}

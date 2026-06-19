@@ -1,30 +1,47 @@
 // src/pages/PhotoboothPage.jsx
-import { useState, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
-import { Camera, Upload, Download, RotateCcw, Plus, X, Images } from 'lucide-react';
-import { PHOTOBOOTH_LAYOUTS, LOCKET_FRAMES, FILTERS } from '../data/mockData';
+import { Upload, Download, RotateCcw, Plus, X, Camera } from 'lucide-react';
+import { PHOTOBOOTH_LAYOUTS, FILTERS } from '../data/mockData';
 import Button from '../components/ui/Button';
+import Modal from '../components/ui/Modal';
+import CameraCapture from '../components/ui/CameraCapture';
 import toast from 'react-hot-toast';
+
+const BG_COLORS = ['#000000', '#ffffff', '#1a1a1a', '#f5f0e8', '#0a0f1e', '#1c0a00'];
 
 export default function PhotoboothPage() {
   const [layout, setLayout] = useState(PHOTOBOOTH_LAYOUTS[0]);
   const [photos, setPhotos] = useState([]);
-  const [activeFrame, setActiveFrame] = useState(null);
   const [activeFilter, setActiveFilter] = useState(null);
   const [bgColor, setBgColor] = useState('#000000');
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   const maxPhotos = layout.total;
 
   const onDrop = useCallback((acceptedFiles) => {
     const remaining = maxPhotos - photos.length;
-    const newFiles = acceptedFiles.slice(0, remaining).map((file) => ({
+    const newFiles = acceptedFiles.slice(0, remaining).map(f => ({
+      id: Date.now() + Math.random(),
+      url: URL.createObjectURL(f),
+      name: f.name,
+      file: f,
+    }));
+    setPhotos(prev => [...prev, ...newFiles]);
+  }, [photos, maxPhotos]);
+
+  const handleCapture = (file) => {
+    if (photos.length >= maxPhotos) return;
+    const newPhoto = {
       id: Date.now() + Math.random(),
       url: URL.createObjectURL(file),
       name: file.name,
-    }));
-    setPhotos((prev) => [...prev, ...newFiles]);
-  }, [photos, maxPhotos]);
+      file: file,
+    };
+    setPhotos(prev => [...prev, newPhoto]);
+    setIsCameraOpen(false);
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -33,91 +50,89 @@ export default function PhotoboothPage() {
     disabled: photos.length >= maxPhotos,
   });
 
-  const removePhoto = (id) => {
-    setPhotos((prev) => prev.filter((p) => p.id !== id));
-  };
+  const removePhoto = id => setPhotos(prev => prev.filter(p => p.id !== id));
 
   const handleReset = () => {
     setPhotos([]);
     setActiveFilter(null);
-    setActiveFrame(null);
   };
 
   const handleDownload = () => {
     toast.success('Đang tạo photobooth... (cần kết nối backend)');
   };
 
-  const BG_COLORS = ['#000000', '#ffffff', '#1a1a1a', '#f5f0e8', '#0a0f1e', '#1c0a00'];
-
   return (
-    <div className="min-h-screen pt-20 pb-28 md:pb-8 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="page">
+      <div className="page-container">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-zinc-100">
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="page-header">
+          <h1 className="page-title font-display">
             Photo<span className="gold-gradient-text">booth</span>
           </h1>
-          <p className="text-zinc-400 mt-1">Tạo bộ ảnh ghép phong cách Locket Gold</p>
+          <p className="page-subtitle">Tạo bộ ảnh ghép phong cách Locket Gold</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left: Controls */}
-          <div className="space-y-6">
-            {/* Layout Selection */}
-            <div className="glass-card p-4 space-y-3">
-              <h3 className="text-sm font-semibold text-zinc-200">📐 Bố cục</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {PHOTOBOOTH_LAYOUTS.map((l) => (
+        <div className="pb-main-grid">
+
+          {/* ── Left Controls ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+            {/* Layout */}
+            <div className="pb-control-card">
+              <p className="pb-control-label">
+                <span>📐</span> Bố cục
+              </p>
+              <div className="pb-layout-grid">
+                {PHOTOBOOTH_LAYOUTS.map(l => (
                   <button
                     key={l.id}
                     onClick={() => { setLayout(l); setPhotos([]); }}
-                    className={[
-                      'p-3 rounded-xl border text-left transition-all',
-                      layout.id === l.id
-                        ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400'
-                        : 'border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600',
-                    ].join(' ')}
+                    className={`pb-layout-btn${layout.id === l.id ? ' active' : ''}`}
                   >
-                    <span className="text-xl block mb-1">{l.icon}</span>
-                    <span className="text-xs font-medium">{l.name}</span>
-                    <span className="text-[10px] text-zinc-500 block">{l.total} ảnh</span>
+                    <span className="pb-layout-icon">{l.icon}</span>
+                    <span className="pb-layout-name">{l.name}</span>
+                    <span className="pb-layout-count">{l.total} ảnh</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Filter */}
-            <div className="glass-card p-4 space-y-3">
-              <h3 className="text-sm font-semibold text-zinc-200">🎨 Bộ lọc</h3>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="pb-control-card">
+              <p className="pb-control-label">
+                <span>🎨</span> Bộ lọc
+              </p>
+              <div className="pb-filter-grid">
                 <button
                   onClick={() => setActiveFilter(null)}
-                  className={`p-2 rounded-xl border text-center text-xs transition-all ${!activeFilter ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400' : 'border-zinc-700 text-zinc-400'}`}
+                  className={`pb-filter-btn${!activeFilter ? ' active' : ''}`}
                 >
                   Gốc
                 </button>
-                {FILTERS.slice(0, 5).map((f) => (
+                {FILTERS.slice(0, 5).map(f => (
                   <button
                     key={f.id}
                     onClick={() => setActiveFilter(f)}
-                    className={`p-2 rounded-xl border text-center text-xs transition-all ${activeFilter?.id === f.id ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400' : 'border-zinc-700 text-zinc-400'}`}
+                    className={`pb-filter-btn${activeFilter?.id === f.id ? ' active' : ''}`}
                   >
-                    {f.icon}
-                    <span className="block text-[10px] mt-0.5">{f.nameVi}</span>
+                    <span style={{ display: 'block', fontSize: 16, marginBottom: 2 }}>{f.icon}</span>
+                    {f.nameVi}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Background Color */}
-            <div className="glass-card p-4 space-y-3">
-              <h3 className="text-sm font-semibold text-zinc-200">🎨 Nền</h3>
-              <div className="flex gap-2 flex-wrap">
-                {BG_COLORS.map((color) => (
+            {/* Background */}
+            <div className="pb-control-card">
+              <p className="pb-control-label">
+                <span>🖼️</span> Màu nền
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {BG_COLORS.map(color => (
                   <button
                     key={color}
                     onClick={() => setBgColor(color)}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${bgColor === color ? 'border-yellow-500 scale-110' : 'border-zinc-600 hover:border-zinc-400'}`}
+                    className={`pb-color-swatch${bgColor === color ? ' active' : ''}`}
                     style={{ backgroundColor: color }}
                   />
                 ))}
@@ -125,85 +140,92 @@ export default function PhotoboothPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={handleReset}>
-                <RotateCcw size={14} />
-                Đặt lại
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Button variant="ghost" style={{ flex: 1 }} onClick={handleReset}>
+                <RotateCcw size={14} /> Đặt lại
               </Button>
-              <Button variant="gold" className="flex-1" onClick={handleDownload} disabled={photos.length === 0}>
-                <Download size={14} />
-                Xuất ảnh
+              <Button variant="gold" style={{ flex: 1 }} onClick={handleDownload} disabled={photos.length === 0}>
+                <Download size={14} /> Xuất ảnh
               </Button>
             </div>
           </div>
 
-          {/* Right: Canvas */}
-          <div className="lg:col-span-2 space-y-4">
+          {/* ── Right Canvas ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {/* Photobooth Preview */}
-            <div
-              className="rounded-2xl border border-zinc-700/50 overflow-hidden"
-              style={{ backgroundColor: bgColor }}
-            >
+            <div className="pb-canvas" style={{ backgroundColor: bgColor }}>
               <div
-                className={`grid gap-1 p-2`}
                 style={{
+                  display: 'grid',
+                  gap: 4,
+                  padding: 8,
                   gridTemplateColumns: `repeat(${layout.cols}, 1fr)`,
                   gridTemplateRows: `repeat(${layout.rows}, 1fr)`,
                 }}
               >
                 {Array.from({ length: maxPhotos }).map((_, i) => (
-                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden">
+                  <div key={i} className="pb-slot">
                     {photos[i] ? (
                       <>
                         <img
                           src={photos[i].url}
                           alt={`Photo ${i + 1}`}
-                          className="w-full h-full object-cover"
+                          className="pb-slot-img"
                           style={{ filter: activeFilter?.cssFilter }}
                         />
-                        <button
-                          onClick={() => removePhoto(photos[i].id)}
-                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white hover:bg-red-400 transition-colors"
-                        >
+                        <button className="pb-slot-remove" onClick={() => removePhoto(photos[i].id)}>
                           <X size={10} />
                         </button>
                       </>
                     ) : (
-                      <div
-                        {...(photos.length < maxPhotos ? getRootProps() : {})}
-                        className="w-full h-full flex flex-col items-center justify-center gap-1 border-2 border-dashed border-zinc-600/50 rounded-lg cursor-pointer hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all"
-                      >
-                        <input {...getInputProps()} />
-                        <Plus size={20} className="text-zinc-500" />
-                        <span className="text-[10px] text-zinc-500">Thêm ảnh</span>
+                      <div style={{ display: 'flex', gap: 4, height: '100%', padding: 2 }}>
+                        <div
+                          {...(photos.length < maxPhotos ? getRootProps() : {})}
+                          style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-card)', borderRadius: 6, cursor: 'pointer', border: '1px dashed var(--border-md)' }}
+                        >
+                          <input {...getInputProps()} />
+                          <Upload size={14} style={{ color: 'var(--text-3)', marginBottom: 2 }} />
+                          <span style={{ fontSize: 9, color: 'var(--text-3)' }}>Tải ảnh</span>
+                        </div>
+                        <div
+                          onClick={() => setIsCameraOpen(true)}
+                          style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-card)', borderRadius: 6, cursor: 'pointer', border: '1px dashed var(--border-md)' }}
+                        >
+                          <Camera size={14} style={{ color: 'var(--text-3)', marginBottom: 2 }} />
+                          <span style={{ fontSize: 9, color: 'var(--text-3)' }}>Chụp ảnh</span>
+                        </div>
                       </div>
                     )}
                   </div>
                 ))}
               </div>
-
-              {/* Bottom Label */}
-              <div className="px-3 pb-3 text-center">
-                <p className="font-display text-sm font-bold gold-gradient-text">LOCKET GOLD ULTIMATE</p>
-              </div>
+              <p className="pb-canvas-label font-display">LOCKET GOLD ULTIMATE</p>
             </div>
 
-            {/* Upload Area */}
+            {/* Drop zone */}
             {photos.length < maxPhotos && (
               <div
                 {...getRootProps()}
-                className={`upload-zone p-6 text-center cursor-pointer ${isDragActive ? 'drag-over' : ''}`}
+                className={`upload-zone${isDragActive ? ' drag-over' : ''}`}
+                style={{ padding: '24px', textAlign: 'center', cursor: 'pointer' }}
               >
                 <input {...getInputProps()} />
-                <Upload size={24} className="text-zinc-500 mx-auto mb-2" />
-                <p className="text-sm text-zinc-400">
-                  {isDragActive ? 'Thả ảnh vào đây' : `Kéo thả hoặc click để thêm ảnh (${photos.length}/${maxPhotos})`}
+                <Upload size={24} style={{ color: 'var(--text-3)', margin: '0 auto 8px' }} />
+                <p style={{ fontSize: 13, color: 'var(--text-2)' }}>
+                  {isDragActive
+                    ? 'Thả ảnh vào đây...'
+                    : `Kéo thả hoặc click để thêm (${photos.length}/${maxPhotos})`}
                 </p>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Camera Modal */}
+      <Modal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} title="Chụp Ảnh" size="md">
+        <CameraCapture onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} />
+      </Modal>
     </div>
   );
 }

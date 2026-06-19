@@ -2,13 +2,17 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Image, Film, X } from 'lucide-react';
+import { Upload, Image, Film, X, Camera } from 'lucide-react';
 import { isImageFile, isVideoFile, formatFileSize, validateImageFile, validateVideoFile } from '../../utils/imageUtils';
 import useEditorStore from '../../store/editorStore';
+import Button from '../ui/Button';
+import Modal from '../ui/Modal';
+import CameraCapture from '../ui/CameraCapture';
 import toast from 'react-hot-toast';
 
 export default function UploadZone({ mode = 'both' }) {
   const [error, setError] = useState('');
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const { setUploadedFile, previewUrl } = useEditorStore();
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -33,6 +37,13 @@ export default function UploadZone({ mode = 'both' }) {
       setError('Định dạng file không được hỗ trợ');
     }
   }, [setUploadedFile]);
+
+  const handleCapture = (file) => {
+    const url = URL.createObjectURL(file);
+    setUploadedFile(file, url, 'image');
+    toast.success('Đã chụp ảnh thành công!');
+    setIsCameraOpen(false);
+  };
 
   const accept = mode === 'image'
     ? { 'image/*': ['.jpg', '.jpeg', '.png', '.webp', '.gif'] }
@@ -143,7 +154,19 @@ export default function UploadZone({ mode = 'both' }) {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <div className="mt-6 flex justify-center">
+          <Button variant="outline" onClick={() => setIsCameraOpen(true)}>
+            <Camera size={18} className="mr-2" /> Mở Camera Chụp Trực Tiếp
+          </Button>
+        </div>
+
       </motion.div>
+
+      {/* Camera Modal */}
+      <Modal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} title="Chụp Ảnh" size="md">
+        <CameraCapture onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} />
+      </Modal>
     </div>
   );
 }

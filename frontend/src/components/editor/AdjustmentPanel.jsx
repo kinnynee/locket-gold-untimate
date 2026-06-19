@@ -7,36 +7,35 @@ import Button from '../ui/Button';
 
 export default function AdjustmentPanel() {
   const { adjustments, setAdjustment, resetAdjustments } = useEditorStore();
-
-  const hasChanges = ADJUSTMENTS.some((adj) => adjustments[adj.id] !== adj.default);
+  const hasChanges = ADJUSTMENTS.some(adj => adjustments[adj.id] !== adj.default);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
-          <span>🎛️</span>
-          Điều Chỉnh
-        </h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <p className="panel-section-label" style={{ marginBottom: 0 }}>🎛️ Điều Chỉnh</p>
         {hasChanges && (
-          <Button variant="ghost" size="sm" onClick={resetAdjustments} className="h-7 px-2 text-xs">
-            <RotateCcw size={12} />
-            Đặt lại
+          <Button variant="ghost" size="sm" onClick={resetAdjustments}>
+            <RotateCcw size={12} /> Đặt lại
           </Button>
         )}
       </div>
 
-      <div className="space-y-5">
-        {ADJUSTMENTS.map((adj) => (
-          <Slider
-            key={adj.id}
-            label={adj.label}
-            icon={adj.icon}
-            value={adjustments[adj.id]}
-            min={adj.min}
-            max={adj.max}
-            step={adj.step}
-            onChange={(val) => setAdjustment(adj.id, val)}
-          />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        {ADJUSTMENTS.map(adj => (
+          <div key={adj.id} className="adjustment-row">
+            <div className="adjustment-header">
+              <span className="adjustment-label">{adj.icon} {adj.label}</span>
+              <span className="adjustment-value">{adjustments[adj.id] > 0 ? '+' : ''}{adjustments[adj.id]}</span>
+            </div>
+            <Slider
+              label=""
+              value={adjustments[adj.id]}
+              min={adj.min}
+              max={adj.max}
+              step={adj.step}
+              onChange={val => setAdjustment(adj.id, val)}
+            />
+          </div>
         ))}
       </div>
     </div>

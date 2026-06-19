@@ -4,76 +4,80 @@ import { motion } from 'framer-motion';
 import { Download, Trash2, Edit, Eye } from 'lucide-react';
 
 export default function GalleryCard({ item, onDownload, onDelete, onEdit, onPreview }) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: .9 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
+      exit={{ opacity: 0, scale: .9 }}
       whileHover={{ y: -4 }}
-      className="group relative rounded-xl overflow-hidden bg-zinc-800 border border-zinc-700/50 hover:border-yellow-500/30 transition-all duration-300"
+      className="gallery-card"
     >
       {/* Image */}
-      <div className="aspect-square overflow-hidden bg-zinc-900">
-        {!imageLoaded && <div className="skeleton w-full h-full" />}
-        <img
-          src={item.src}
-          alt={item.title}
-          className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          onLoad={() => setImageLoaded(true)}
-        />
-      </div>
+      {!loaded && <div className="skeleton" style={{ position: 'absolute', inset: 0 }} />}
+      <img
+        src={item.src}
+        alt={item.title}
+        onLoad={() => setLoaded(true)}
+        style={{ opacity: loaded ? 1 : 0, transition: 'opacity .3s' }}
+      />
 
-      {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        {/* Action Buttons */}
-        <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      {/* Overlay */}
+      <div className="gallery-card-overlay">
+        {/* Actions top-right */}
+        <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 5 }}>
           <button
-            onClick={(e) => { e.stopPropagation(); onPreview?.(item); }}
-            className="w-8 h-8 rounded-lg bg-zinc-900/80 backdrop-blur-sm border border-zinc-700/50 flex items-center justify-center text-zinc-300 hover:text-zinc-100 hover:border-zinc-500 transition-colors"
+            onClick={e => { e.stopPropagation(); onPreview?.(item); }}
+            className="gallery-card-action"
             title="Xem"
           >
-            <Eye size={14} />
+            <Eye size={13} />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); onEdit?.(item); }}
-            className="w-8 h-8 rounded-lg bg-zinc-900/80 backdrop-blur-sm border border-zinc-700/50 flex items-center justify-center text-zinc-300 hover:text-yellow-400 hover:border-yellow-500/50 transition-colors"
+            onClick={e => { e.stopPropagation(); onEdit?.(item); }}
+            className="gallery-card-action"
             title="Chỉnh sửa"
           >
-            <Edit size={14} />
+            <Edit size={13} />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); onDelete?.(item.id); }}
-            className="w-8 h-8 rounded-lg bg-zinc-900/80 backdrop-blur-sm border border-zinc-700/50 flex items-center justify-center text-zinc-300 hover:text-red-400 hover:border-red-500/50 transition-colors"
+            onClick={e => { e.stopPropagation(); onDelete?.(item.id); }}
+            className="gallery-card-action danger"
             title="Xóa"
           >
-            <Trash2 size={14} />
+            <Trash2 size={13} />
           </button>
         </div>
 
-        {/* Download Button */}
-        <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {/* Bottom info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="gallery-card-tag">{item.filter}</span>
           <button
-            onClick={(e) => { e.stopPropagation(); onDownload?.(item); }}
-            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-semibold transition-colors"
+            onClick={e => { e.stopPropagation(); onDownload?.(item); }}
+            style={{
+              width: '100%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+              padding: '7px', borderRadius: 8,
+              background: 'var(--gold-500)', color: '#000',
+              fontSize: 11, fontWeight: 700,
+              transition: 'background .2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--gold-400)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'var(--gold-500)'}
           >
-            <Download size={13} />
-            Tải xuống
+            <Download size={12} /> Tải xuống
           </button>
         </div>
       </div>
 
-      {/* Info */}
-      <div className="p-3">
-        <p className="text-sm font-medium text-zinc-200 truncate">{item.title}</p>
-        <div className="flex items-center justify-between mt-1">
-          <span className="text-xs text-zinc-500">{item.date}</span>
-          <span className="text-xs px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-400/80 border border-yellow-500/20">
-            {item.filter}
-          </span>
-        </div>
+      {/* Info bar */}
+      <div style={{ padding: '10px 12px', borderTop: '1px solid var(--border)' }}>
+        <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
+          {item.title}
+        </p>
+        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{item.date}</p>
       </div>
     </motion.div>
   );
